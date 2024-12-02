@@ -33,7 +33,7 @@ generalize across different scenarios
 ### Access
 The notebook downloads every file from the list `file_list.json` locally and splits them in train, test, and validation datasets before uploading them into a bucket in S3 such as:
 ![Access](img/00001.jpg)
-![Access](img/00002.jpg)
+![Upload](img/00002.jpg)
 
 ## Model Training
 **TODO**: What kind of model did you choose for this experiment and why? Give an overview of the types of hyperparameters that you specified and why you chose them. Also remember to evaluate the performance of your model.
