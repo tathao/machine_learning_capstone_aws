@@ -65,7 +65,9 @@ This project pipline on the following:
 ## Standout Suggestions
 **(Optional):** This is where you can provide information about any standout suggestions that you have attempted.
 
-* Hyperparameter Tuning: When selecting hyperparameters and their ranges for tuning, the goal is to focus on those that significantly influence the model's performance while ensuring the search space is broad enough to explore promising configurations efficiently
+### Hyperparameter Tuning: 
+
+When selecting hyperparameters and their ranges for tuning, the goal is to focus on those that significantly influence the model's performance while ensuring the search space is broad enough to explore promising configurations efficiently
 
     * Batch Size: The range [32, 64, 128]
     * Learning Rate: The range [1e-4, 5e-2]
@@ -152,7 +154,7 @@ def main(args):
     hook.register_loss(loss_criterion)
     ...
 ```
-* Model Deploying and Querying
+### Model Deploying and Querying
 
   We can deploy the model that created to the Sagamaker inference.
   ```python
@@ -184,7 +186,7 @@ def main(args):
     print(np.argmax(response[0]) + 1)
      ```
 
-* Cheaper Training and Cost Analysis
+### Cheaper Training and Cost Analysis
 
 
 1. Instance Type and Pricing:
@@ -269,7 +271,7 @@ estimator = PyTorch(
 ![Retry](img/retry.png)
 
 
-* Install multi instance
+### Install multi instance
 
 Just set instance_count=num_of_instance
 
