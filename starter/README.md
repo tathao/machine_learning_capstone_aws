@@ -46,10 +46,10 @@ Hyperparameters type:
 
 Evaluate the performance:
 
-* Accuracy: EfficientNet (31%) > ResNet50 (29%)
-* Precision: EfficientNet (0.34) > ResNet50 (0.21)
-* Recall: EfficientNet (0.30) > ResNet50 (0.27)
-* F1 Score: EfficientNet (0.30) > ResNet50 (0.19)
+* Accuracy: EfficientNet (30%) > ResNet50 (29%)
+* Precision: EfficientNet (0.35) > ResNet50 (0.30)
+* Recall: EfficientNet (0.28) > ResNet50 (0.27)
+* F1 Score: EfficientNet (0.28) > ResNet50 (0.25)
 
 ## Machine Learning Pipeline
 This project pipline on the following:
@@ -153,3 +153,60 @@ def main(args):
     ...
 ```
 * Model Deploying and Querying
+
+  We can deploy the model that created to the Sagamaker inference.
+  ```python
+    predictor=estimator.deploy(initial_instance_count=1, instance_type="ml.g4dn.xlarge")
+    predictor
+  ```
+  and make a query
+     ```python
+    # We need process the image first
+    import torchvision.transforms as transforms
+
+    def process_image(image):    
+        img = image.convert('RGB')
+        data_transform = transforms.Compose(
+            [transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])]
+        )
+
+        return data_transform(img)[:3,:,:].unsqueeze(0).numpy()
+
+    img_processed = process_image(img)
+    ```
+    ```python
+    import numpy as np
+    response = predictor.predict(img_processed)
+    print("Prediction result with processing:")
+    print(np.argmax(response[0]) + 1)
+     ```
+
+* Cost Analysis
+
+
+1. Instance Type and Pricing:
+
+   * Example hourly costs for common SageMaker training instances
+
+        * `ml.m5.large` (CPU): ~$0.115/hour
+    
+          
+        * `ml.g4dn.xlarge` (GPU with NVIDIA T4): ~$0.526/hour
+    
+          
+        * `ml.p3.2xlarge` (GPU): ~$3.825/hour
+        
+2. Training Duration
+
+   If training takes 10 hours
+
+    * `ml.m5.large`: $1.15
+  
+      
+    * `ml.p3.2xlarge`: $38.25
+3. S3 Storage Costs
+
+   * Storage costs for training artifacts, model checkpoints, and logs are ~$0.023/GB/month
