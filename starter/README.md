@@ -184,7 +184,7 @@ def main(args):
     print(np.argmax(response[0]) + 1)
      ```
 
-* Cost Analysis
+* Cheaper Training and Cost Analysis
 
 
 1. Instance Type and Pricing:
@@ -211,7 +211,7 @@ def main(args):
 
    * Storage costs for training artifacts, model checkpoints, and logs are ~$0.023/GB/month
   
-We create the checkpoint so when the training is currupted, we can continue from checkpoint
+We will use the spot instance to train. Create the checkpoint so when the training is currupted, we can continue from checkpoint
 
 ```python
 def save_checkpoint(model, optimizer, epoch, checkpoint_dir):
@@ -236,4 +236,32 @@ def load_checkpoint(model, optimizer, checkpoint_dir):
     model.load_state_dict(checkpoint["model_state_dict"])
     optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
     return model, optimizer, checkpoint["epoch"]
+```
+Define the estimator with 
+```python 
+use_spot_instances=True 
+```
+
+```python 
+# Define SageMaker PyTorch Estimator with Spot Instances
+estimator = PyTorch(
+    entry_point="train_efficient_spot.py",    # Your training script
+    source_dir="./src",
+    role=role,                                # SageMaker IAM role
+    framework_version="1.12",
+    py_version="py38",
+    instance_type="ml.m5.2xlarge",            
+    instance_count=1,
+    use_spot_instances=True,                  # Enable Spot Instances
+    max_run=3600,                             # Max training time in seconds
+    max_wait=7200,                            # Max wait time (includes Spot delays)
+    checkpoint_s3_uri=che_directory,        # S3 path for checkpoints
+    output_path=output_dir,                  # S3 path for training output
+    hyperparameters={
+        "batch_size": 128,
+        "learning_rate": 0.001,
+        "num_epochs": 10,
+        "num_classes": 133
+    }
+)
 ```
