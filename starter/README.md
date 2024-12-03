@@ -72,7 +72,7 @@ This project pipline on the following:
     * Number of Epochs: [5, 15]
 * Model Profiling and Debugging: Use model debugging and profiling to better monitor and debug your model training job.
 
-```
+```python
 #Declare your HP ranges, metrics etc.
 hyperparameter_ranges = {
     'batch_size': IntegerParameter(32, 128),
@@ -90,5 +90,66 @@ metric_definitions = [
     {"Name": "Recall", "Regex": "Recall: ([0-9\\.]+)"},
     {"Name": "F1 Score", "Regex": "F1 Score: ([0-9\\.]+)"}
 ]
+```
+```python
+# Create your training estimator
+estimator = PyTorch(
+    entry_point="hpo.py",
+    source_dir="./src",
+    role=role,
+    framework_version='1.12',
+    py_version='py38',
+    instance_count=1,
+    instance_type='ml.g4dn.xlarge', # Use GPU-enabled instance
+)
+
+# Define hyperparameter tuner
+tuner = HyperparameterTuner(
+    estimator=estimator,
+    objective_metric_name=objective_metric_name,
+    objective_type=objective_type,
+    hyperparameter_ranges=hyperparameter_ranges,
+    metric_definitions=metric_definitions,
+    max_jobs=5,  # Number of total jobs
+    max_parallel_jobs=2  # Number of jobs to run in parallel
+)
+```
+
+And we use the  Hook to apply the debug the model
+```python
+def test(model, test_loader, criterion, hook ,device):
+    model.eval()
+    hook.set_mode(modes.EVAL)
+    ...
+
+def train(model, train_loader, criterion, optimizer, device, hook ,epoch):
+    model.train()
+    hook.set_mode(smd.modes.TRAIN)
+    ...
+
+def main(args):
+    # Check if CUDA (GPU) is available, otherwise fallback to CPU
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    logger.info(f"Using device: {device}")
+    
+    num_classes = args.num_classes
+    
+    # Initialize the model
+    logger.info("Initializing the model...")
+    model = net(num_classes).to(device)
+
+     # Initialize SageMaker Debugger Hook
+    hook = smd.Hook.create_from_json_file()
+    hook.register_hook(model)
+
+    print("Creating data loaders...")
+    train_loader, test_loader = create_data_loaders(args.batch_size)
+    
+    # Create loss and optimizer
+    loss_criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.fc.parameters(), lr=args.learning_rate)
+
+    hook.register_loss(loss_criterion)
+    ...
 ```
 * Model Deploying and Querying
