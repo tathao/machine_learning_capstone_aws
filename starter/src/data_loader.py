@@ -3,6 +3,10 @@ import torch
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
+from tqdm import tqdm
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 class DataLoaderCreator:
     def __init__(self, train_dir, val_dir, test_dir, img_size=(224, 224), batch_size=32):
         self.train_dir = train_dir
