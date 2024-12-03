@@ -267,3 +267,30 @@ estimator = PyTorch(
 ```
 
 ![Retry](img/retry.png)
+
+
+* Install multi instance
+
+Just set instance_count=num_of_instance
+
+**Note**: Multi instance just only work with CPU instance.
+
+```python 
+# Define SageMaker PyTorch Estimator with Spot Instances
+estimator = PyTorch(
+    entry_point="train_efficient.py",    # Your training script
+    source_dir="./src",
+    role=role,                                # SageMaker IAM role
+    framework_version="1.12",
+    py_version="py38",
+    instance_type="ml.m5.2xlarge",            
+    instance_count=4,
+    output_path=output_dir,                  # S3 path for training output
+    hyperparameters={
+        "batch_size": 128,
+        "learning_rate": 0.001,
+        "num_epochs": 10,
+        "num_classes": 133
+    }
+)
+```
