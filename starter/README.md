@@ -210,3 +210,30 @@ def main(args):
 3. S3 Storage Costs
 
    * Storage costs for training artifacts, model checkpoints, and logs are ~$0.023/GB/month
+  
+We create the checkpoint so when the training is currupted, we can continue from checkpoint
+
+```python
+def save_checkpoint(model, optimizer, epoch, checkpoint_dir):
+    os.makedirs(checkpoint_dir, exist_ok=True)
+    checkpoint_path = os.path.join(checkpoint_dir, f"checkpoint-{epoch}.pt")
+    torch.save({
+        "epoch": epoch,
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict()
+    }, checkpoint_path)
+    logger.info(f"Checkpoint saved at {checkpoint_path}")
+
+def load_checkpoint(model, optimizer, checkpoint_dir):
+    checkpoint_files = [f for f in os.listdir(checkpoint_dir) if f.startswith("checkpoint")]
+    if not checkpoint_files:
+        return model, optimizer, 0  # No checkpoint found, start from scratch
+
+    latest_checkpoint = max(checkpoint_files, key=lambda x: int(x.split('-')[1].split('.')[0]))
+    checkpoint_path = os.path.join(checkpoint_dir, latest_checkpoint)
+    logger.info(f"Loading checkpoint from {checkpoint_path}")
+    checkpoint = torch.load(checkpoint_path)
+    model.load_state_dict(checkpoint["model_state_dict"])
+    optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+    return model, optimizer, checkpoint["epoch"]
+```
