@@ -265,3 +265,5 @@ estimator = PyTorch(
     }
 )
 ```
+
+![Retry](img/retry.png)

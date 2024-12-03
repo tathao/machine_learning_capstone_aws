@@ -126,12 +126,19 @@ def load_checkpoint(model, optimizer, checkpoint_dir):
     checkpoint_path = os.path.join(checkpoint_dir, latest_checkpoint)
     logger.info(f"Loading checkpoint from {checkpoint_path}")
     checkpoint = torch.load(checkpoint_path)
+    if checkpoint is None:
+        logger.error(f"Checkpoint is None! Failed to load from {checkpoint_path}")
+        return model, optimizer, 0
     model.load_state_dict(checkpoint["model_state_dict"])
     optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
     return model, optimizer, checkpoint["epoch"]
     
 def net(num_classes, pretrained=True):
     model = models.efficientnet_b0(pretrained=pretrained)
+    if model is None:
+        logger.error("Failed to initialize the model.")
+    else:
+        logger.info("Model initialized successfully.")
     # Unfreeze all layers
     for param in model.parameters():
         param.requires_grad = True
